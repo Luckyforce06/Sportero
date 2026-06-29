@@ -1,0 +1,23 @@
+# Dépendances (pour le backend et le frontend)
+**/node_modules/
+
+# Configuration locale / Variables d'environnement (Sécurité)
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Fichiers de configuration de l'éditeur (Optionnel : si vous voulez les partager avec votre équipe, retirez-les)
+.vscode/
+frontend/.vscode/
+
+# Fichiers système
+**/.DS_Store
+**/Thumbs.db
+
+# Dossiers de build / production du frontend (générés par Vite)
+frontend/dist/
+frontend/build/
+
+# Logs de crash
+**/npm-debug.log*
+**/yarn-error.log*

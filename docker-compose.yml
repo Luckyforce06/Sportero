@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: sportero_db
+    restart: always
+    environment:
+      POSTGRES_USER: sportero_user
+      POSTGRES_PASSWORD: sportero_password
+      POSTGRES_DB: sportero_database
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    container_name: sportero_backend
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - DATABASE_URL=postgresql://sportero_user:sportero_password@db:5432/sportero_database
+      - PORT=3000
+    depends_on:
+      - db
+
+  frontend:
+    container_name: sportero_frontend
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
