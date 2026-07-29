@@ -1,17 +1,16 @@
 const bcrypt = require('bcrypt');
-const User = require('../models/User'); // Ajuste le chemin selon ton architecture de modèles
-const { Op } = require('sequelize'); // 🔥 Assure-toi que cette ligne est présente au début du fichier !
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const { Op } = require('sequelize');
 
 exports.register = async (req, res) => {
   try {
     const { pseudo, email, password } = req.body;
 
-    // 1. Validation de base
     if (!pseudo || !email || !password) {
       return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
     }
 
-    // 2. Vérifier si l'utilisateur existe déjà (Email ou Pseudo)
     const existingUser = await User.findOne({
       where: {
         [Op.or]: [{ email }, { pseudo }]
@@ -22,18 +21,15 @@ exports.register = async (req, res) => {
       return res.status(409).json({ message: "Le pseudo ou l'adresse email est déjà utilisé." });
     }
 
-    // 3. Hachage du mot de passe (Salt round = 10 pour un excellent ratio sécurité/perf)
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4. Création de l'utilisateur en base de données
     const newUser = await User.create({
       pseudo,
       email,
-      password: hashedPassword // On enregistre le mot de passe crypté !
+      password: hashedPassword
     });
 
-    // 5. Réponse de succès (on ne renvoie JAMAIS le mot de passe, même haché)
     return res.status(201).json({
       message: 'Utilisateur créé avec succès !',
       user: {
@@ -44,6 +40,48 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur lors de l'inscription :", error);
+    return res.status(500).json({ message: 'Une erreur interne est survenue.' });
+  }
+};
+
+exports.login = async (req, res) => {
+  try {
+    const { identifier, password } = req.body;
+
+    if (!identifier || !password) {
+      return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
+    }
+
+    const user = await User.findOne({
+      where: {
+        [Op.or]: [{ email: identifier }, { pseudo: identifier }]
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Identifiants incorrects.' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Identifiants incorrects.' });
+    }
+
+    const secretKey = process.env.JWT_SECRET || 'sportero_super_secret_key_ultra_safe';
+
+    const token = jwt.sign({ id: user.id, pseudo: user.pseudo }, secretKey, { expiresIn: '24h' });
+
+    return res.status(200).json({
+      message: 'Connexion réussie !',
+      token,
+      user: {
+        id: user.id,
+        pseudo: user.pseudo,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors de la connexion :', error);
     return res.status(500).json({ message: 'Une erreur interne est survenue.' });
   }
 };

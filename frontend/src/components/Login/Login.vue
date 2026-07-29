@@ -13,24 +13,20 @@
 
     <div class="auth-card-wrapper">
       <div class="auth-card">
-        <h2 class="card-title">Création d’un compte</h2>
-        <p class="card-subtitle">Vous avez besoin d’un compte pour accéder à Sportero</p>
+        <h2 class="card-title">Connexion</h2>
+        <p class="card-subtitle">Connectez-vous pour accéder à votre espace Sportero</p>
 
         <form class="auth-form" @submit.prevent="handleSubmit">
           <div class="form-group">
-            <label for="pseudo">Pseudo</label>
-            <input type="text" id="pseudo" v-model="formData.pseudo" required />
-          </div>
-
-          <div class="form-group">
-            <label for="email">Adresse mail</label>
-            <input type="email" id="email" v-model="formData.email" required />
+            <label for="identifier">Pseudo ou Adresse mail</label>
+            <input type="text" id="identifier" v-model="formData.identifier" required />
           </div>
 
           <div class="form-group">
             <label for="password">Mot de passe</label>
             <input type="password" id="password" v-model="formData.password" required />
           </div>
+
           <div v-if="errorMessage" class="alert-error">
             {{ errorMessage }}
           </div>
@@ -40,13 +36,13 @@
           </div>
 
           <button type="submit" class="btn-submit" :disabled="isLoading">
-            {{ isLoading ? 'Création en cours...' : 'Créer votre compte →' }}
+            {{ isLoading ? 'Connexion en cours...' : 'Se connecter →' }}
           </button>
         </form>
 
         <hr class="divider" />
 
-        <p class="switch-auth">Déjà un compte ? <router-link to="/login">Connectez-vous</router-link></p>
+        <p class="switch-auth">Nouveau sur Sportero ? <router-link to="/register">Créez un compte</router-link></p>
       </div>
     </div>
   </div>
@@ -55,10 +51,12 @@
 <script setup>
 import { ref } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const formData = ref({
-  pseudo: '',
-  email: '',
+  identifier: '',
   password: ''
 });
 
@@ -72,28 +70,35 @@ const handleSubmit = async () => {
   isLoading.value = true;
 
   try {
-    const response = await axios.post('http://localhost:3000/api/auth/register', {
-      pseudo: formData.value.pseudo,
-      email: formData.value.email,
-      password: formData.value.password
-    });
+  const response = await axios.post('http://localhost:3000/api/auth/login', {
+    identifier: formData.value.identifier,
+    password: formData.value.password
+  });
 
-    successMessage.value = response.data.message || 'Inscription réussie !';
+  console.log('1. Réponse reçue du serveur :', response.data);
 
-    setTimeout(() => {
-  router.push('/login');
-}, 2000);
+  // Sauvegarde
+  localStorage.setItem('token', response.data.token);
+  localStorage.setItem('user', JSON.stringify(response.data.user));
 
-    formData.value = { pseudo: '', email: '', password: '' };
-  } catch (error) {
-    if (error.response && error.response.data) {
-      errorMessage.value = error.response.data.message;
-    } else {
-      errorMessage.value = 'Impossible de contacter le serveur. Vérifie ta connexion.';
-    }
-  } finally {
-    isLoading.value = false;
+  console.log('2. Token enregistré dans localStorage :', localStorage.getItem('token'));
+
+  // Tentative de redirection
+  console.log('3. Tentative de redirection vers /dashboard...');
+  
+  // Utilisation de la redirection native par précaution
+  window.location.href = '/dashboard';
+
+} catch (error) {
+  console.error('Erreur attrapée :', error);
+  if (error.response && error.response.data) {
+    errorMessage.value = error.response.data.message;
+  } else {
+    errorMessage.value = 'Impossible de contacter le serveur. Vérifie ta connexion.';
   }
+} finally {
+  isLoading.value = false;
+}
 };
 </script>
 

@@ -1,28 +1,46 @@
 const express = require('express');
-const cors = require('cors'); // Si tu l'utilises déjà pour lier le front et le back
+const cors = require('cors');
+
+const { connectDB, sequelize } = require('./config/db');
+
+// 2. Imports des Routeurs et Contrôleurs
 const authRoutes = require('./routers/auth.router');
-// Remplace la ligne qui charge ./models par celle-ci :
-const { sequelize } = require('./config/db');
+const workoutRoutes = require('./routers/workout.router');
+const exerciceRoutes = require('./routers/exercice.router');
+const friendRouter = require('./routers/friend.router');
+
+const { getWorkouts, createWorkout } = require('./controllers/workout.controller.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. Middlewares de base
+// 3. Middlewares
 app.use(cors());
-app.use(express.json()); // 🔥 INDISPENSABLE pour lire req.body !
+app.use(express.json());
 
-// 2. Liaison des routes
+// 4. Endpoints API
 app.use('/api/auth', authRoutes);
+app.use('/api/workouts', workoutRoutes);
+app.use('/api/exercices', exerciceRoutes);
+app.use('/api/friends', friendRouter);
 
-// 3. Démarrage du serveur et synchronisation DB
-// Assure-toi d'appeler directement sequelize.sync()
-sequelize
-  .sync()
-  .then(() => {
+// 5. Initialisation & Démarrage du serveur
+const startServer = async () => {
+  try {
+    // Connexion à la BDD
+    await connectDB();
+
+    // Synchronisation des modèles avec la BDD
+    await sequelize.sync();
+    console.log('🔄 Modèles Sequelize synchronisés avec PostgreSQL.');
+
+    // Lancement de Express
     app.listen(PORT, () => {
       console.log(`🚀 Serveur Sportero actif sur le port ${PORT}`);
     });
-  })
-  .catch(err => {
-    console.error('Impossible de connecter la base de données :', err);
-  });
+  } catch (err) {
+    console.error('❌ Erreur lors du démarrage du serveur :', err);
+  }
+};
+
+startServer();

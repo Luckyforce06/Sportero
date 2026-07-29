@@ -1,7 +1,5 @@
 <template>
-  <div class="app-main-wrapper">
-    <Register />
-  </div>
+  <router-view />
 </template>
 
 <script setup>
