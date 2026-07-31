@@ -100,11 +100,15 @@
                 <div class="avatar-small">{{ friend.pseudo.substring(0, 2).toUpperCase() }}</div>
                 <div>
                   <span class="friend-name">{{ friend.pseudo }}</span>
-                  <span class="friend-status-text">Actif récemment</span>
+                  <!-- Indicateur de statut en direct -->
+                  <span class="friend-status-text" :class="{ 'is-online': isFriendOnline(friend.id) }">
+                    <span class="mini-dot" :class="{ online: isFriendOnline(friend.id) }"></span>
+                    {{ isFriendOnline(friend.id) ? 'En ligne' : 'Hors ligne' }}
+                  </span>
                 </div>
               </div>
-                <button class="btn-outline-danger" @click="removeFriend(friend.friendshipId)">Retirer</button>            
-              </div>
+              <button class="btn-outline-danger" @click="removeFriend(friend.friendshipId)">Retirer</button>            
+            </div>
           </div>
         </div>
       </main>
@@ -132,12 +136,14 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import friendService from '../../services/friendService.ts';
+import { socket } from '../../services/socker'; // Assure-toi que le chemin vers ton instance socket correspond
 
 const router = useRouter();
 const user = ref(null);
 const searchQuery = ref('');
 const friends = ref([]);
 const pendingRequests = ref([]);
+const onlineUserIds = ref([]);
 
 // Charger les données (amis et demandes)
 const loadFriendData = async () => {
@@ -148,6 +154,10 @@ const loadFriendData = async () => {
     ]);
     friends.value = friendsData;
     pendingRequests.value = requestsData;
+    
+    // 🔍 Regarde dans ta console du navigateur (F12) ce que contiennent tes amis et leurs IDs !
+    console.log("Liste des amis reçue :", friendsData);
+    console.log("IDs actuellement en ligne sur le socket :", onlineUserIds.value);
   } catch (error) {
     console.error("Erreur lors du chargement des données d'amis :", error);
   }
@@ -158,12 +168,43 @@ onMounted(() => {
   if (storedUser) {
     try {
       user.value = JSON.parse(storedUser);
+      
+      // Connexion explicite et enregistrement de l'utilisateur
+      if (user.value && user.value.id) {
+        if (!socket.connected) {
+          socket.connect();
+        }
+        
+        // On s'assure d'émettre l'événement dès que le socket est connecté
+        socket.on('connect', () => {
+          console.log("Socket connectée, envoi de l'ID :", user.value.id);
+          socket.emit('register_user', String(user.value.id));
+        });
+
+        // Si le socket est déjà connecté au moment du montage
+        if (socket.connected) {
+          socket.emit('register_user', String(user.value.id));
+        }
+      }
     } catch (e) {
-      console.error('Erreur profil');
+      console.error('Erreur profil ou socket', e);
     }
   }
-  loadFriendData(); // Charge les données au montage
+
+  // Écoute de la liste des utilisateurs connectés diffusée par le backend
+  socket.on('online_users', (userIds) => {
+    console.log("Liste des utilisateurs en ligne reçue du serveur :", userIds);
+    onlineUserIds.value = userIds;
+  });
+
+  loadFriendData();
 });
+
+// Vérifie si un ami est dans la liste des IDs connectés
+const isFriendOnline = (friendId) => {
+  if (!friendId) return false;
+  return onlineUserIds.value.map(id => String(id)).includes(String(friendId));
+};
 
 const userInitials = computed(() => {
   const name = user.value?.pseudo || 'A';
@@ -192,7 +233,7 @@ const searchUser = async () => {
 const acceptRequest = async (id) => {
   try {
     await friendService.acceptRequest(id);
-    loadFriendData(); // Rafraîchit les listes pour faire basculer l'ami dans "Mes Amis"
+    loadFriendData(); 
   } catch (err) {
     console.error("Erreur lors de l'acceptation :", err);
   }
@@ -200,9 +241,8 @@ const acceptRequest = async (id) => {
 
 const declineRequest = async (id) => {
   try {
-    // Dans ton backend, la suppression d'une demande en attente utilise la même route "removeFriend" (destroy par ID)
     await friendService.removeFriend(id);
-    loadFriendData(); // Rafraîchit les listes
+    loadFriendData(); 
   } catch (err) {
     console.error("Erreur lors du refus de l'invitation :", err);
     alert("Impossible de refuser cette invitation.");
@@ -212,7 +252,7 @@ const declineRequest = async (id) => {
 const removeFriend = async (id) => {
   try {
     await friendService.removeFriend(id);
-    loadFriendData(); // Rafraîchit les listes pour le faire disparaître
+    loadFriendData(); 
   } catch (err) {
     console.error("Erreur lors de la suppression de l'ami :", err);
     alert("Impossible de supprimer cet ami.");
@@ -223,7 +263,7 @@ const removeFriend = async (id) => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-/* Réutilisation de la charte graphique Dashboard */
+/* Styles généraux */
 .app-container {
   width: 100vw;
   height: 100vh;
@@ -350,7 +390,12 @@ const removeFriend = async (id) => {
   font-weight: 800; font-size: 0.75rem; display: flex; align-items: center; justify-content: center;
 }
 .friend-name { font-weight: 600; font-size: 0.9rem; display: block; }
-.friend-status-text { font-size: 0.75rem; color: #9ca3af; }
+
+/* Styles pour le statut dynamique */
+.friend-status-text { font-size: 0.75rem; color: #6b7280; display: flex; align-items: center; gap: 0.35rem; }
+.friend-status-text.is-online { color: #10b981; }
+.mini-dot { width: 6px; height: 6px; border-radius: 50%; background-color: #6b7280; display: inline-block; }
+.mini-dot.online { background-color: #10b981; box-shadow: 0 0 6px #10b981; }
 
 .action-buttons { display: flex; gap: 0.5rem; }
 .btn-accept { background: #10b981; color: #000; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.8rem; }

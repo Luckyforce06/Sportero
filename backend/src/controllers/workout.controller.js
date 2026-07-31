@@ -1,9 +1,10 @@
 const { Workout, Exercice, WorkoutExercice } = require('../models');
 
-// Récupérer toutes les séances avec leurs exercices
+// Récupérer toutes les séances de l'utilisateur connecté
 exports.getWorkouts = async (req, res) => {
   try {
     const workouts = await Workout.findAll({
+      where: { userId: req.user.id },
       include: [
         {
           model: Exercice,
@@ -15,15 +16,15 @@ exports.getWorkouts = async (req, res) => {
     });
     res.json(workouts);
   } catch (error) {
-    console.error('Erreur getWoarkouts:', error);
+    console.error('Erreur getWorkouts:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Créer une séance complète avec ses exercices
+// Créer une séance complète liée à l'utilisateur connecté
 exports.createWorkout = async (req, res) => {
   try {
-    console.log('Données reçues du front :', req.body); // 👈 Vérifie ce que tu reçois
+    console.log('Données reçues du front :', req.body);
     const { title, category, intensity, description, estimatedTime, exercises } = req.body;
 
     const newWorkout = await Workout.create({
@@ -31,16 +32,15 @@ exports.createWorkout = async (req, res) => {
       category,
       intensity,
       description,
-      estimatedTime
+      estimatedTime,
+      userId: req.user.id
     });
 
     console.log("Séance créée avec l'ID :", newWorkout.id);
-    console.log('Tableau des exercices reçus :', exercises); // 👈 Vérifie si les exercices sont bien là
 
     if (exercises && exercises.length > 0) {
       for (let i = 0; i < exercises.length; i++) {
         const exData = exercises[i];
-        console.log(`Traitement de l'exercice ${i} :`, exData);
 
         const [exercice] = await Exercice.findOrCreate({
           where: { name: exData.name },
@@ -58,10 +58,7 @@ exports.createWorkout = async (req, res) => {
           restSec: Number(exData.rest || exData.restSec) || 60,
           order: i + 1
         });
-        console.log('Lien inséré avec succès pour :', exData.name);
       }
-    } else {
-      console.log('⚠️ Aucun exercice trouvé dans req.body.exercises !');
     }
 
     const fullWorkout = await Workout.findByPk(newWorkout.id, {
@@ -78,5 +75,29 @@ exports.createWorkout = async (req, res) => {
   } catch (error) {
     console.error('Erreur lors de la création de la séance :', error);
     res.status(400).json({ error: error.message });
+  }
+};
+
+// Récupérer une séance spécifique (accessible par son ID pour les participants du live)
+exports.getWorkoutById = async (req, res) => {
+  try {
+    const workout = await Workout.findByPk(req.params.id, {
+      include: [
+        {
+          model: Exercice,
+          as: 'Exercises',
+          through: { attributes: ['sets', 'reps', 'restSec', 'order'] }
+        }
+      ]
+    });
+
+    if (!workout) {
+      return res.status(404).json({ error: 'Séance introuvable' });
+    }
+
+    res.json(workout);
+  } catch (error) {
+    console.error('Erreur getWorkoutById:', error);
+    res.status(500).json({ error: error.message });
   }
 };

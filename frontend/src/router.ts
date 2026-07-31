@@ -4,6 +4,7 @@ import Register from './components/Register/Register.vue';
 import Dashboard from './components/Dashboard/Dashboard.vue';
 import WorkoutsView from './components/Workouts/WorkoutsView.vue';
 import FriendsView from './components/FriendsView/FriendsView.vue';
+import WorkoutSession from './components/Workouts/WorkoutSession/WorkoutSession.vue';
 
 const routes = [
   {
@@ -26,6 +27,12 @@ const routes = [
     path: '/workouts',
     name: 'Workouts',
     component: WorkoutsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/workouts/:id',
+    name: 'WorkoutSession',
+    component: WorkoutSession,
     meta: { requiresAuth: true }
   },
   {

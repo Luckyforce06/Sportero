@@ -16,7 +16,7 @@ const Workout = sequelize.define('Workout', {
     allowNull: false
   },
   intensity: {
-    type: DataTypes.ENUM('Facile', 'Moyen', 'Intense'),
+    type: DataTypes.ENUM('Faible', 'Moyen', 'Intense'),
     defaultValue: 'Moyen'
   },
   description: {
@@ -26,6 +26,11 @@ const Workout = sequelize.define('Workout', {
   estimatedTime: {
     type: DataTypes.INTEGER,
     defaultValue: 45
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    field: 'userId'
   }
 });
 

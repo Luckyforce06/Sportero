@@ -179,18 +179,15 @@
 
           <div class="tooltip-title">Liste des exercices et description :</div>
           <ul class="tooltip-exercises-list detail-list">
-            <li v-for="(ex, idx) in (selectedWorkout?.Exercises || selectedWorkout?.exercises || [])" :key="idx">
-              <strong>{{ ex.name }}</strong>
-              <div class="ex-sub-details">
-                <span>{{ ex.WorkoutExercise?.sets || ex.sets || 4 }} séries</span> • 
-                <span>{{ ex.WorkoutExercise?.reps || ex.reps || '10' }} reps</span> • 
-                <span>{{ ex.WorkoutExercise?.restSec || ex.rest || 60 }}s repos</span>
-              </div>
-            </li>
-            <li v-if="!(selectedWorkout?.Exercises || selectedWorkout?.exercises || []).length" class="empty-tip">
-              Aucun exercice configuré pour cette séance.
-            </li>
-          </ul>
+  <li v-for="(ex, idx) in (selectedWorkout?.Exercises || selectedWorkout?.exercises || [])" :key="idx">
+    <strong>{{ ex.name }}</strong>
+    <div class="ex-sub-details">
+      <span>{{ ex.WorkoutExercice?.sets || ex.sets || 4 }} séries</span> • 
+      <span>{{ ex.WorkoutExercice?.reps || ex.reps || '10' }} reps</span> • 
+      <span>{{ ex.WorkoutExercice?.restSec || ex.restSec || 60 }}s repos</span>
+    </div>
+  </li>
+</ul>
         </div>
 
         <div class="modal-actions">
@@ -244,7 +241,12 @@ const newWorkout = ref({
 
 const fetchWorkouts = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/workouts');
+    const token = localStorage.getItem('token'); // Récupération du token stocké lors du login
+    const response = await fetch('http://localhost:3000/api/workouts', {
+      headers: {
+        'Authorization': `Bearer ${token}` // 👈 Transmission du token
+      }
+    });
     if (response.ok) {
       allWorkouts.value = await response.json();
     }
@@ -279,6 +281,8 @@ const openModal = () => {
 const closeModal = () => { isModalOpen.value = false; };
 
 const openDetailModal = (workout) => {
+  console.log("Données de la séance :", workout);
+  console.log("Premier exercice :", workout.Exercises || workout.exercises);
   selectedWorkout.value = workout;
   isDetailModalOpen.value = true;
 };
@@ -296,7 +300,6 @@ const removeExerciseRow = (index) => {
 
 const createWorkout = async () => {
   try {
-    // S'assurer que le payload envoie bien "exercises" ou "Exercises" selon le backend
     const payload = {
       title: newWorkout.value.title,
       category: newWorkout.value.category,
@@ -309,9 +312,13 @@ const createWorkout = async () => {
       }))
     };
 
+    const token = localStorage.getItem('token'); // 👈 Récupération du token
     const response = await fetch('http://localhost:3000/api/workouts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // 👈 Ajout indispensable du header d'authentification
+      },
       body: JSON.stringify(payload)
     });
 

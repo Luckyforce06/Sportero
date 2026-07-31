@@ -5,7 +5,11 @@ const WorkoutExercice = require('./WorkoutExercice');
 const User = require('./User');
 const Friendship = require('./Friendship');
 
-// Associations
+// Associations User <-> Workout
+User.hasMany(Workout, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Workout.belongsTo(User, { foreignKey: 'userId' });
+
+// Associations Workout <-> Exercice (Many-to-Many)
 Workout.belongsToMany(Exercice, { through: WorkoutExercice, as: 'Exercises', onDelete: 'CASCADE' });
 Exercice.belongsToMany(Workout, { through: WorkoutExercice, as: 'Workouts' });
 
