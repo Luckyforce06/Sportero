@@ -32,7 +32,7 @@ sportero/
 ## ⚙️ Installation & Lancement
 
 1. Cloner le dépôt :
-   git clone https://github.com/votre-nom-utilisateur/sportero.git
+   git clone [https://github.com/votre-nom-utilisateur/sportero.git](https://github.com/Luckyforce06/Sportero)
    cd sportero
 
 2. Installer les dépendances :
