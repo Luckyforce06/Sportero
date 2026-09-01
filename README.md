@@ -1,4 +1,4 @@
-**# Sportero 🏋️‍♂️🔥
+** Sportero 🏋️‍♂️🔥
 
 > **Sportero** est une application web moderne de fitness et d'entraînement sur-mesure. Conçue pour centraliser la gestion de vos séances personnelles et dynamiser la motivation grâce à un mode collaboratif en temps réel.
 
@@ -35,9 +35,9 @@ sportero/
 │   └── main.js       # Point d'entrée de l'application
 ├── public/           # Fichiers statiques
 └── package.json      # Dépendances et scripts du projet
+```
 
-
-**# Sportero 🏋️‍♂️🔥
+** Sportero 🏋️‍♂️🔥
 
 > Sportero est une application web moderne de fitness et d'entraînement sur-mesure, conçue pour centraliser vos séances personnelles et dynamiser votre motivation grâce à un mode collaboratif en temps réel.
 
