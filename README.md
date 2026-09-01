@@ -1,44 +1,5 @@
 # Sportero 🏋️‍♂️🔥
 
-> **Sportero** est une application web moderne de fitness et d'entraînement sur-mesure. Conçue pour centraliser la gestion de vos séances personnelles et dynamiser la motivation grâce à un mode collaboratif en temps réel.
-
----
-
-## 🚀 Fonctionnalités Clés
-
-* **Tableau de Bord Intuitif :** Espace d'accueil personnalisé affichant le profil de l'athlète et un accès direct aux fonctionnalités principales.
-* **Personnalisation des Séances :** Création, configuration et modification d'exercices, de séries et de temps de repos adaptés à vos objectifs.
-* **Mode Salon Collaboratif (Live) :** Partagez et suivez des sessions de sport en direct avec vos amis, où que vous soyez.
-* **Espace Communauté :** Gestion des contacts, ajout d'amis et interactions pour rester motivé ensemble.
-* **Design Multiplateforme :** Interface responsive optimisée pour une navigation fluide sur ordinateur (sidebar fixe) et sur mobile (barre de navigation tactile).
-
----
-
-## 🛠️ Stack Technique
-
-* **Front-end :** Vue.js 3 (Composition API), Vue Router
-* **Style & UI :** CSS Grid, Flexbox, Design system sur-mesure (mode sombre, teintes orange et gris foncé)
-* **Stockage & Session :** Gestion locale (`localStorage`) et authentification sécurisée
-
----
-
-## 📂 Structure du Projet
-
-```text
-sportero/
-├── src/
-│   ├── assets/       # Logos et ressources graphiques
-│   ├── components/   # Composants réutilisables
-│   ├── router/       # Configuration des routes (Vue Router)
-│   ├── views/        # Vues principales (Dashboard, Séances, Amis)
-│   ├── App.vue       # Composant racine
-│   └── main.js       # Point d'entrée de l'application
-├── public/           # Fichiers statiques
-└── package.json      # Dépendances et scripts du projet
-```
-
-## Sportero 🏋️‍♂️🔥
-
 > Sportero est une application web moderne de fitness et d'entraînement sur-mesure, conçue pour centraliser vos séances personnelles et dynamiser votre motivation grâce à un mode collaboratif en temps réel.
 
 ## 🚀 Fonctionnalités Clés
