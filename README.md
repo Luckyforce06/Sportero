@@ -17,7 +17,7 @@
 * **Stockage & Session :** Gestion locale (localStorage) et authentification sécurisée
 
 ## 📂 Structure du Projet
-
+```text
 sportero/
 ├── src/
 │   ├── assets/       # Ressources graphiques et logos
@@ -28,7 +28,7 @@ sportero/
 │   └── main.js       # Point d'entrée de l'application
 ├── public/           # Fichiers statiques
 └── package.json      # Dépendances et scripts du projet
-
+```
 ## ⚙️ Installation & Lancement
 
 1. Cloner le dépôt :
