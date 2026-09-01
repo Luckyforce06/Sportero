@@ -33,15 +33,16 @@ sportero/
 
 1. Cloner le dépôt :
    git clone [https://github.com/votre-nom-utilisateur/sportero.git](https://github.com/Luckyforce06/Sportero)
+   
    cd sportero
 
-2. Installer les dépendances :
+3. Installer les dépendances :
    npm install
 
-3. Lancer le serveur de développement :
+4. Lancer le serveur de développement :
    npm run dev
 
-4. Ouvrir l'application :
+5. Ouvrir l'application :
    Accédez à l'adresse indiquée dans votre terminal (généralement http://localhost:5173).
 
 ## 💡 Défis Techniques & Choix d'Architecture
